@@ -14,8 +14,16 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import org.json.JSONArray;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -46,8 +54,9 @@ public class IncomingSms extends BroadcastReceiver {
                     String senderNum = phoneNumber;
                     String message = currentMessage.getDisplayMessageBody();
 
-                    if(Pattern.matches("((([a-zA-Z]+)[ ]+([a-zA-Z0-9]+))[\\n]*){2}",message)){
+                    if(Pattern.matches("((([a-zA-Z]+)[ ]+([a-zA-Z0-9]+))[\\n]*){4,6}",message)){
                     Log.i(TAG, "onReceive: "+ senderNum+" "+message);
+//                    checkTheFormat(senderNum,message);
                     insertIntoDatabase(senderNum,message);
                     Toast.makeText(context, senderNum+" "+message , Toast.LENGTH_LONG).show();}
                     else {
@@ -60,12 +69,20 @@ public class IncomingSms extends BroadcastReceiver {
         }
     }
 
+    private void checkTheFormat(String senderNum, String message) {
+        String messages[] = message.split("\\s+");
+        for(int i=0;i<messages.length;i++){
+
+        }
+    }
+
     private void insertIntoDatabase(String senderNum, String message) {
         Date date = new Date();
         long time = date.getTime();
         Log.i(TAG, "insertIntoDatabase: "+time);
         HashMap<String,Object> itemsMap = new HashMap<>();
         itemsMap.put("Number",senderNum);
+
         itemsMap.put("Message",message);
         RootRef.child(String.valueOf(time)).updateChildren(itemsMap)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {

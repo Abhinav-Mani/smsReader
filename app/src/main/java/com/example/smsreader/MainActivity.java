@@ -9,11 +9,21 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.security.Permission;
 
 public class MainActivity extends AppCompatActivity implements MessageListener{
+
+    TextView showMessage;
+    EditText fill;
+    Button checkButton;
 
     private static final String TAG = "MainActivity";
     public static final int PERMISSION_CODE = 123;
@@ -21,6 +31,23 @@ public class MainActivity extends AppCompatActivity implements MessageListener{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        showMessage = findViewById(R.id.showMessage);
+        fill = findViewById(R.id.fill);
+        checkButton = findViewById(R.id.checkbutton);
+
+        checkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String s = fill.getText().toString();
+                String message[] = s.split("\\s+");
+                String k="";
+                for(int i=0;i<message.length;i++){
+                    k= k+ message[i]+"next";
+                }
+                showMessage.setText(k);
+            }
+        });
 
         MessageReceiver.bindListener(this);
 
