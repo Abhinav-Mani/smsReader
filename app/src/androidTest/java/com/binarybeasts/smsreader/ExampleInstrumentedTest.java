@@ -1,4 +1,4 @@
-package com.example.smsreader;
+package com.binarybeasts.smsreader;
 
 import android.content.Context;
 

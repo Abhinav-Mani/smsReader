@@ -1,6 +1,4 @@
-package com.example.smsreader.Models;
-
-import android.widget.ImageView;
+package com.binarybeasts.smsreader.Models;
 
 public class Products {
     String ProductName;
@@ -45,6 +43,17 @@ public class Products {
         PhoneNo = phoneNo;
         Contact = contact;
     }
+
+    public Products(String productName, String price, String location, String quality, String delivery, String phoneNo) {
+        ProductName = productName;
+        Price = price;
+        Location = location;
+        Quality = quality;
+        Delivery = delivery;
+        PhoneNo = phoneNo;
+        Contact = "NA";
+    }
+
     public void setImg(String img) {
         this.img = img;
     }

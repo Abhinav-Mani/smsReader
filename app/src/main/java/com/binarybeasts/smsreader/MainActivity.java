@@ -1,4 +1,4 @@
-package com.example.smsreader;
+package com.binarybeasts.smsreader;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,10 +14,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.w3c.dom.Text;
-
-import java.security.Permission;
 
 public class MainActivity extends AppCompatActivity implements MessageListener{
 
@@ -58,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements MessageListener{
                 
             }else {
                 ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{Manifest.permission.READ_SMS,Manifest.permission.RECEIVE_SMS},PERMISSION_CODE);
+                        new String[]{Manifest.permission.READ_SMS,Manifest.permission.RECEIVE_SMS,Manifest.permission.SEND_SMS},PERMISSION_CODE);
             }
         }else {
             Log.d(TAG, "onCreate: Given");
@@ -75,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements MessageListener{
                     Log.d(TAG, "onRequestPermissionsResult: Yes");
                 } else {
                     ActivityCompat.requestPermissions(MainActivity.this,
-                            new String[]{Manifest.permission.READ_SMS,Manifest.permission.RECEIVE_SMS},PERMISSION_CODE);
+                            new String[]{Manifest.permission.READ_SMS,Manifest.permission.RECEIVE_SMS,Manifest.permission.SEND_SMS},PERMISSION_CODE);
                 }
                 return;
             }
