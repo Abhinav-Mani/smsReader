@@ -10,15 +10,23 @@ import android.telephony.SmsMessage;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+import com.binarybeasts.smsreader.Models.OrderRequest;
 import com.binarybeasts.smsreader.Models.Products;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -27,11 +35,13 @@ public class IncomingSms extends BroadcastReceiver {
     private DatabaseReference RootRef;
     private static final String TAG = "IncomingSms";
     final SmsManager smsManager = SmsManager.getDefault();
+    final String[] requestMessage = {"No Any Product found"};
 
     public IncomingSms() {
         super();
         RootRef = FirebaseDatabase.getInstance().getReference();
         Log.i("Voila", "IncomingSms: Entered");
+        //showData();
     }
 
     @Override
@@ -98,11 +108,95 @@ public class IncomingSms extends BroadcastReceiver {
                 Map.Entry mentry = (Map.Entry) o;
                 Log.i(TAG, "key is " + mentry.getKey() + " and value is " + mentry.getValue());
             }
-        }else
+        }else if(message.equals("Show Me")){
+            showData(senderNum);
+        }
+        else
         {
-            Log.d(TAG, "checkTheFormat: Did not Match");
+            Log.d(TAG, "checkTheFormat: Did not Match"+" "+senderNum);
             //sendSMS(senderNum,"Format Did not Match");
         }
+    }
+
+    private void showData(final String senderNum){
+        Log.i("retrieval", "showData: Entered");
+        RootRef.child("Products").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                Products newProducts = dataSnapshot.getValue(Products.class);
+//                919262237472
+                if(newProducts.getPhoneNo().equals(senderNum)){
+                    final String nameOfRequestProduct = newProducts.getProductName();
+                    Log.i("retrieval", "name: "+ newProducts.getProductName());
+                    Log.i("retrieval", "price: "+newProducts.getPrice());
+                    Log.i("retrieval", "location: "+newProducts.getLocation());
+                    Log.i("retrieval", "PhoneNo: "+newProducts.getPhoneNo());
+                    Log.i("retrieval", "onChildAdded: Good"+" "+dataSnapshot.getKey());
+//                    _ids.add(dataSnapshot.getKey());
+                    try {
+                        RootRef.child("Requests").child(Objects.requireNonNull(dataSnapshot.getKey()))
+                                .addChildEventListener(new ChildEventListener() {
+                                    @Override
+                                    public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                                        OrderRequest requestedProduct = dataSnapshot.getValue(OrderRequest.class);
+                                        requestMessage[0] = "Name: "+nameOfRequestProduct + "\n"+ "Quantity: "+ requestedProduct.getAmount() +"\n"+ "Price: "+requestedProduct.getProductPrice()+"\n"+ "DeliverPrice: "+requestedProduct.getDeliverPrice();
+                                        Log.i("Received", "onChildAdded: "+ requestMessage[0]);
+                                        Log.i("Received", "Quantity: " + requestedProduct.getAmount());
+                                        Log.i("Received", "price: " + requestedProduct.getProductPrice());
+                                        Log.i("Received", "DeliverPrice: " + requestedProduct.getDeliverPrice());
+                                        Log.i("Received", "PhoneNo: " + requestedProduct.getFrom());
+                                        sendSMS(senderNum, requestMessage[0]);
+                                    }
+
+                                    @Override
+                                    public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                                    }
+
+                                    @Override
+                                    public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                                    }
+
+                                    @Override
+                                    public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+//                                        sendSMS("+917903149292",requestMessage[0]);
+                                    }
+                                });
+                    }catch (Exception e){
+                        Log.i("received", "onChildAdded: this product not found");
+                    }
+
+                }
+
+
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void insertIntoDatabase(Products products) {
